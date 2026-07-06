@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { updateUserProfile } from "@/lib/firebase/firestore";
+import { updateUserProfile } from "@/lib/supabase/database";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { ADDICTION_OPTIONS } from "@/lib/constants";
 import { Bell } from "lucide-react";

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signInWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
-import { isFirebaseConfigured } from "@/lib/firebase/config";
+import { signInWithEmail, signInWithGoogle } from "@/lib/supabase/auth";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -21,8 +21,8 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!isFirebaseConfigured()) {
-      setError("Firebase is not configured. Copy .env.example to .env.local, add your keys, and restart the dev server.");
+    if (!isSupabaseConfigured()) {
+      setError("Supabase is not configured. Copy .env.example to .env.local, add your keys, and restart the dev server.");
       return;
     }
     setLoading(true);
@@ -38,17 +38,15 @@ export default function LoginPage() {
 
   const handleGoogle = async () => {
     setError("");
-    if (!isFirebaseConfigured()) {
-      setError("Firebase is not configured. Copy .env.example to .env.local, add your keys, and restart the dev server.");
+    if (!isSupabaseConfigured()) {
+      setError("Supabase is not configured. Copy .env.example to .env.local, add your keys, and restart the dev server.");
       return;
     }
     setLoading(true);
     try {
       await signInWithGoogle();
-      router.push("/dashboard");
     } catch {
       setError("Google sign-in failed. Please try again.");
-    } finally {
       setLoading(false);
     }
   };

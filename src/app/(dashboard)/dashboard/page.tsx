@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { getTodayCheckIn, getGoals } from "@/lib/firebase/firestore";
+import { getTodayCheckIn, getGoals } from "@/lib/supabase/database";
 import { getStreakFromDate } from "@/lib/utils/dates";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";

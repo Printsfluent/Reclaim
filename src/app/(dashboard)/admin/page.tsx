@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AdminRoute } from "@/components/auth/ProtectedRoute";
-import { getAllUsers, getReports, getCommunityPosts, deleteCommunityPost } from "@/lib/firebase/firestore";
+import { getAllUsers, getReports, getCommunityPosts, deleteCommunityPost } from "@/lib/supabase/database";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import type { UserProfile, CommunityPost } from "@/lib/types";

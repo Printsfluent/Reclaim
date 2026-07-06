@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils/cn";
 import { APP_NAME } from "@/lib/constants";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { logOut } from "@/lib/firebase/auth";
+import { logOut } from "@/lib/supabase/auth";
 import { useRouter } from "next/navigation";
 
 const navItems = [

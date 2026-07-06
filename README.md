@@ -1,6 +1,6 @@
 # RecoveryHub
 
-A modern, mobile-first addiction recovery platform built with Next.js 15, Firebase, and Groq.
+A modern, mobile-first addiction recovery platform built with Next.js 15, Supabase, and Groq.
 
 RecoveryHub helps users track progress, manage relapses, journal privately, interact with an AI recovery coach, and engage with a supportive anonymous community.
 
@@ -32,8 +32,7 @@ RecoveryHub helps users track progress, manage relapses, journal privately, inte
 | Framework | Next.js 15 (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 |
-| Auth | Firebase Authentication |
-| Database | Cloud Firestore |
+| Auth & Database | Supabase (PostgreSQL + Auth) |
 | AI | Groq API (llama-3.3-70b-versatile) |
 | Charts | Chart.js + react-chartjs-2 |
 | Deployment | Vercel |
@@ -46,6 +45,7 @@ src/
 │   ├── (auth)/          # Login, signup, password reset
 │   ├── (dashboard)/     # Protected app pages
 │   ├── api/coach/       # Groq API route
+│   ├── auth/callback/   # OAuth callback
 │   ├── onboarding/      # Onboarding flow
 │   └── page.tsx         # Landing page
 ├── components/
@@ -57,28 +57,26 @@ src/
 ├── contexts/            # AuthContext
 └── lib/
     ├── constants/       # App constants, options
-    ├── firebase/        # Auth, Firestore, config
+    ├── supabase/        # Auth, database, client
     ├── types/           # TypeScript interfaces
     └── utils/           # Dates, sanitize, cn
-firestore.rules            # Firebase security rules
-.env.example               # Environment variable template
+supabase/schema.sql      # PostgreSQL schema + RLS policies
+.env.example             # Environment variable template
 ```
 
-## Database Schema (Firestore)
+## Database Schema (Supabase / PostgreSQL)
 
-| Collection | Key Fields |
-|-----------|-----------|
-| `users` | uid, name, email, addictionTypes, recoveryStartDate, role, streaks, recoveryScore |
-| `daily_checkins` | userId, date, mood, hadCravings, triggers, relapsed, notes |
-| `journal_entries` | userId, title, content, createdAt, updatedAt |
-| `recovery_goals` | userId, title, status, targetDays |
-| `relapses` | userId, trigger, circumstances, loggedAt |
-| `triggers` | userId, name, copingStrategies |
-| `coping_strategies` | userId, name, description |
-| `community_posts` | userId, anonymousName, content, type, reportCount |
-| `reports` | postId, reporterId, reason |
-| `notifications` | userId, type, title, message, read |
-| `motivational_content` | type, content, author, active |
+| Table | Key Fields |
+|-------|-----------|
+| `profiles` | id, name, email, addiction_types, recovery_start_date, role, streaks, recovery_score |
+| `daily_checkins` | user_id, date, mood, had_cravings, triggers, relapsed, notes |
+| `journal_entries` | user_id, title, content, created_at, updated_at |
+| `recovery_goals` | user_id, title, status, target_days |
+| `relapses` | user_id, trigger, circumstances, logged_at |
+| `triggers` | user_id, name, coping_strategies |
+| `coping_strategies` | user_id, name, description |
+| `community_posts` | user_id, anonymous_name, content, type, report_count |
+| `reports` | post_id, reporter_id, reason |
 
 ## Setup Guide
 
@@ -90,56 +88,38 @@ cd Reclaim
 npm install
 ```
 
-### 2. Firebase Setup
+### 2. Supabase Setup
 
-1. Create a project at [Firebase Console](https://console.firebase.google.com)
-2. Enable **Authentication** → Email/Password and Google providers
-3. Create a **Firestore Database** (start in production mode)
-4. Deploy security rules:
-   ```bash
-   firebase deploy --only firestore:rules
-   ```
-5. Register a **Web App** and copy config values
+1. Create a project at [Supabase Dashboard](https://supabase.com/dashboard)
+2. Enable **Authentication** → Email provider and Google OAuth
+3. Under **Authentication → URL Configuration**, add:
+   - Site URL: `http://localhost:3000` (and your production URL)
+   - Redirect URL: `http://localhost:3000/auth/callback`
+4. Run the schema in **SQL Editor** — paste contents of `supabase/schema.sql`
 
 ### 3. Environment Variables
-
-Copy the example file and fill in your values:
 
 ```bash
 cp .env.example .env.local
 ```
 
 ```env
-NEXT_PUBLIC_FIREBASE_API_KEY=...
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
-NEXT_PUBLIC_FIREBASE_APP_ID=...
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 GROQ_API_KEY=gsk_...
 ```
 
-### 4. Firestore Indexes
+Find Supabase keys under **Project Settings → API**.
 
-Create composite indexes in Firebase Console (or via CLI when prompted):
+### 4. Admin User
 
-- `daily_checkins`: `userId` ASC, `date` DESC
-- `daily_checkins`: `userId` ASC, `date` ASC
-- `journal_entries`: `userId` ASC, `updatedAt` DESC
-- `recovery_goals`: `userId` ASC, `createdAt` DESC
-- `relapses`: `userId` ASC, `loggedAt` DESC
-- `community_posts`: `createdAt` DESC
-- `reports`: `createdAt` DESC
+Set a user's role to `admin` in the Supabase table editor:
 
-### 5. Admin User
-
-Set a user's role to `admin` in Firestore:
-
-```
-users/{uid}/role = "admin"
+```sql
+update profiles set role = 'admin' where email = 'you@example.com';
 ```
 
-### 6. Run Locally
+### 5. Run Locally
 
 ```bash
 npm run dev
@@ -152,23 +132,22 @@ Open [http://localhost:3000](http://localhost:3000).
 1. Push code to GitHub
 2. Import project in [Vercel](https://vercel.com)
 3. Add all environment variables from `.env.example`
-4. Deploy
-
-Vercel auto-detects Next.js. No extra config needed.
+4. Add your Vercel URL to Supabase auth redirect URLs
+5. Deploy
 
 ### Production Checklist
 
-- [ ] Firebase Auth authorized domains include your Vercel URL
-- [ ] Firestore rules deployed
-- [ ] Composite indexes created
+- [ ] Supabase schema applied (`supabase/schema.sql`)
+- [ ] Supabase auth redirect URLs include production domain
+- [ ] Google OAuth configured in Supabase (if using)
 - [ ] Environment variables set in Vercel dashboard
 - [ ] Groq API key configured
 
 ## Security
 
-- **Firestore Rules** — Owner-based access, admin overrides
+- **Row Level Security** — Owner-based access, admin overrides
 - **Rate Limiting** — AI coach API (20 req/min per IP)
-- **Input Validation** — Zod schemas on API routes, sanitization on Firestore writes
+- **Input Validation** — Zod schemas on API routes, sanitization on writes
 - **XSS Protection** — Input sanitization, CSP headers via middleware
 - **CSRF** — Same-origin API routes with JSON content-type validation
 

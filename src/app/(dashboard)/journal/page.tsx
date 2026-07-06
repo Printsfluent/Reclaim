@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   getJournalEntries, createJournalEntry, updateJournalEntry, deleteJournalEntry,
-} from "@/lib/firebase/firestore";
+} from "@/lib/supabase/database";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea } from "@/components/ui/Input";

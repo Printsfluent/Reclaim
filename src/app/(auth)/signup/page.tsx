@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signUpWithEmail, signInWithGoogle } from "@/lib/firebase/auth";
+import { signUpWithEmail, signInWithGoogle } from "@/lib/supabase/auth";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
@@ -21,6 +22,10 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!isSupabaseConfigured()) {
+      setError("Supabase is not configured. Copy .env.example to .env.local, add your keys, and restart the dev server.");
+      return;
+    }
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -38,13 +43,15 @@ export default function SignupPage() {
 
   const handleGoogle = async () => {
     setError("");
+    if (!isSupabaseConfigured()) {
+      setError("Supabase is not configured. Copy .env.example to .env.local, add your keys, and restart the dev server.");
+      return;
+    }
     setLoading(true);
     try {
       await signInWithGoogle();
-      router.push("/onboarding");
     } catch {
       setError("Google sign-up failed. Please try again.");
-    } finally {
       setLoading(false);
     }
   };

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { createCheckIn, getTodayCheckIn, logRelapse } from "@/lib/firebase/firestore";
+import { createCheckIn, getTodayCheckIn, logRelapse } from "@/lib/supabase/database";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Textarea, Input } from "@/components/ui/Input";

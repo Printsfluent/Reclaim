@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getCheckIns, getRelapses } from "@/lib/firebase/firestore";
+import { getCheckIns, getRelapses } from "@/lib/supabase/database";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { DailyCheckIn } from "@/lib/types";
 import {

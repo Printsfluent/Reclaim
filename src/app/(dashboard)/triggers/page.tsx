@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   getTriggers, createTrigger, getCopingStrategies, createCopingStrategy,
-} from "@/lib/firebase/firestore";
+} from "@/lib/supabase/database";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
